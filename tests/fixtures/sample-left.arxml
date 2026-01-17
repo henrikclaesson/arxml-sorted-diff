@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<ARXML>
+  <ECU>
+    <SHORT-NAME>MyEcu</SHORT-NAME>
+    <COMPONENTS>
+      <COMPONENT>
+        <SHORT-NAME>CompA</SHORT-NAME>
+      </COMPONENT>
+      <COMPONENT>
+        <SHORT-NAME>CompB</SHORT-NAME>
+      </COMPONENT>
+    </COMPONENTS>
+  </ECU>
+</ARXML>

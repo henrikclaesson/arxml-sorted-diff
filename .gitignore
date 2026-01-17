@@ -1,0 +1,9 @@
+# Rust
+/target
+**/*.rs.bk
+
+# temp
+*.tmp
+
+# IDEs
+.vscode/
