@@ -12,6 +12,16 @@ crossterm = "0.26"
 ratatui = "0.24"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+autosar-data = { version = "0.21", optional = true }
+
+[features]
+# Enable the Autosar sample generator and integration with the `autosar-data` crate
+autosar = ["autosar-data"]
+
+[[bin]]
+name = "generate_samples"
+path = "src/bin/generate_samples.rs"
+required-features = ["autosar"]
 
 [dev-dependencies]
 
