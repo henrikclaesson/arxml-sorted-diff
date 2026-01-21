@@ -19,6 +19,44 @@ impl Element {
     pub fn new(tag: String) -> Self {
         Self { tag, short_name: None, uuid: None, attributes: HashMap::new(), text: None, children: vec![] }
     }
+
+    /// Serialize this element and its subtree into a compact XML string.
+    pub fn serialize(&self) -> String {
+        fn escape(s: &str) -> String {
+            s.replace('&', "&amp;")
+             .replace('<', "&lt;")
+             .replace('>', "&gt;")
+             .replace('"', "&quot;")
+        }
+
+        let mut s = String::new();
+        s.push('<');
+        s.push_str(&self.tag);
+        for (k, v) in &self.attributes {
+            s.push(' ');
+            s.push_str(k);
+            s.push_str("=\"");
+            s.push_str(&escape(v));
+            s.push('"');
+        }
+
+        if self.children.is_empty() && self.text.is_none() {
+            s.push_str("/>");
+            return s;
+        }
+
+        s.push('>');
+        if let Some(t) = &self.text {
+            s.push_str(&escape(t));
+        }
+        for c in &self.children {
+            s.push_str(&c.serialize());
+        }
+        s.push_str("</");
+        s.push_str(&self.tag);
+        s.push('>');
+        s
+    }
 }
 
 fn local_name(name: &str) -> &str {
