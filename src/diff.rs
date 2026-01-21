@@ -15,6 +15,10 @@ pub struct DiffNode {
     pub tag: String,
     pub key: Option<String>,
     pub children: Vec<DiffNode>,
+    /// Serialized XML of the left-hand element (if present) for raw view
+    pub left_xml: Option<String>,
+    /// Serialized XML of the right-hand element (if present) for raw view
+    pub right_xml: Option<String>,
 }
 
 fn key_of(e: &Element) -> String {
@@ -31,7 +35,7 @@ fn diff_elements(left: Option<&Element>, right: Option<&Element>) -> DiffNode {
             for c in &l.children {
                 children.push(diff_elements(Some(c), None));
             }
-            DiffNode { status: NodeStatus::Removed, tag: l.tag.clone(), key: l.short_name.clone().or(l.uuid.clone()), children }
+            DiffNode { status: NodeStatus::Removed, tag: l.tag.clone(), key: l.short_name.clone().or(l.uuid.clone()), children, left_xml: Some(l.serialize()), right_xml: None }
         }
         (None, Some(r)) => {
             // Entire subtree added
@@ -39,7 +43,7 @@ fn diff_elements(left: Option<&Element>, right: Option<&Element>) -> DiffNode {
             for c in &r.children {
                 children.push(diff_elements(None, Some(c)));
             }
-            DiffNode { status: NodeStatus::Added, tag: r.tag.clone(), key: r.short_name.clone().or(r.uuid.clone()), children }
+            DiffNode { status: NodeStatus::Added, tag: r.tag.clone(), key: r.short_name.clone().or(r.uuid.clone()), children, left_xml: None, right_xml: Some(r.serialize()) }
         }
         (Some(l), Some(r)) => {
             let key_l = key_of(l);
@@ -51,11 +55,13 @@ fn diff_elements(left: Option<&Element>, right: Option<&Element>) -> DiffNode {
                     tag: format!("{} -> {}", l.tag, r.tag),
                     key: None,
                     children: vec![diff_elements(Some(l), None), diff_elements(None, Some(r))],
+                    left_xml: Some(l.serialize()),
+                    right_xml: Some(r.serialize()),
                 };
             }
 
             // Same key/tag: compare attributes/text and children
-            let mut node = DiffNode { status: NodeStatus::Unchanged, tag: l.tag.clone(), key: l.short_name.clone().or(l.uuid.clone()), children: Vec::new() };
+            let mut node = DiffNode { status: NodeStatus::Unchanged, tag: l.tag.clone(), key: l.short_name.clone().or(l.uuid.clone()), children: Vec::new(), left_xml: Some(l.serialize()), right_xml: Some(r.serialize()) };
 
             // Quick content check (attributes/text)
             if l.text != r.text || l.attributes != r.attributes {
